@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Socket</string>
+    <string name="task_starting">Task starting...</string>
+</resources>
