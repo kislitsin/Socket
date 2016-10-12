@@ -57,7 +57,7 @@ JSONArray jsa;
     NewLoader ld;
     UpdateApp atualizaApp;
 
-    String jbuffer = "";
+    String jbuffer = "123_100500";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
