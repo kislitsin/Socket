@@ -149,7 +149,7 @@ if(a.contains("success=`1`") && a.contains("buket=`3`")) {
                 outputStream.close();
 
                 byte[] btt = new byte[300];
-                String tx = "00000003 mechanic_images:name=`" +img.getName()+"`;nomer=`а048ку77`";
+                String tx = "00000003 mechanic_images:name=`" +img.getName()+"`;nomer=`а048ку77`;date=`20170220`";
                 buf = tx.getBytes("UTF-8");
                 socketDataOutputStream.write(buf, 0, buf.length);
 

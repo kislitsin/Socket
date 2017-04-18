@@ -2,11 +2,13 @@ package ru.taxi.socket;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +26,9 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,12 +41,24 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import ru.taxi.socket.API.request.ConfirmRequest;
+import ru.taxi.socket.API.request.RegisterRequest;
+import ru.taxi.socket.API.response.ConfirmResponse;
+import ru.taxi.socket.API.response.RegisterResponse;
+
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText editTextAddress, editTextPort;
-    Button buttonConnect, buttonUp, buttonNewConnect, buttonSampleConnect, buttonBalance, buttonPing, buttonVolley;
+    Button buttonConnect, buttonUp, buttonNewConnect, buttonSampleConnect, buttonBalance, buttonPing, buttonRetrofit, buttonRetrofitConfirm,
+    phoneButton;
     TextView buffer;
     TextView responseTextView;
     ActivityManager am;
@@ -57,7 +74,7 @@ JSONArray jsa;
     NewLoader ld;
     UpdateApp atualizaApp;
 
-    String jbuffer = "123_100500_3";
+    String jbuffer = "123_100500_4";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +90,8 @@ JSONArray jsa;
         String myur = sPref.getString("url", "+++++++");
         String mypr = sPref.getString("port", "+++++++");
 
-        editTextAddress = (EditText) findViewById(R.id.addressEditText);
-        editTextPort = (EditText) findViewById(R.id.portEditText);
+       // editTextAddress = (EditText) findViewById(R.id.addressEditText);
+       // editTextPort = (EditText) findViewById(R.id.portEditText);
         buttonConnect = (Button) findViewById(R.id.connectButton);
         buttonUp = (Button) findViewById(R.id.upButton);
         buttonNewConnect = (Button) findViewById(R.id.connectNewButton);
@@ -82,7 +99,9 @@ JSONArray jsa;
         buttonSampleConnect = (Button) findViewById(R.id.sampleButton);
         buttonBalance = (Button) findViewById(R.id.balanceButton);
         buttonPing = (Button) findViewById(R.id.pingButton);
-        buttonVolley = (Button) findViewById(R.id.volleyButton);
+        buttonRetrofit = (Button) findViewById(R.id.retrofitButton);
+        buttonRetrofitConfirm = (Button) findViewById(R.id.retrofitConfirmButton);
+        phoneButton = (Button) findViewById(R.id.phoneButton);
 
      //   parseJSON("\"session_id\": \"a302150ae274c7fe90b7fd1176a85865bdf16e6a\" "); //----------------------------
 
@@ -90,27 +109,60 @@ JSONArray jsa;
 
         //----------------------------------------------
 
-        if (!editTextAddress.getText().equals("")) {
-            myur = editTextAddress.getText().toString();
-        }
-        if (!editTextPort.getText().equals("")) mypr = editTextPort.getText().toString();
+     //   if (!editTextAddress.getText().equals("")) {
+     //       myur = editTextAddress.getText().toString();
+     //   }
+    //    if (!editTextPort.getText().equals("")) mypr = editTextPort.getText().toString();
 
-        ed.putString("url", editTextAddress.getText().toString());
-        ed.putString("port", editTextPort.getText().toString());
+     //   ed.putString("url", editTextAddress.getText().toString());
+     //   ed.putString("port", editTextPort.getText().toString());
         //ed.putString("url", editTextAddress.getText().toString());
-        ed.commit();
-
+     //   ed.commit();
+/*
+        int timeSettings = android.provider.Settings.Global.getInt(
+                getContentResolver(),
+                android.provider.Settings.Global.AUTO_TIME, 0);
+  */
+        //startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
+        int timeSettings = android.provider.Settings.System.getInt(getContentResolver(), android.provider.Settings.System.AUTO_TIME, 100);
+Log.d("[MAIN] ", "---------------------> " + timeSettings);
+        int a = timeSettings;
+        if(a == 1)  startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
 
       //  ld = new NewLoader(this);
 //--------------------------------------------------
+        phoneButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                String usNumberStr = "+1 202-298-5700";  //USA
+               // String usNumberStr = "+33 01 45 04 05 01";   //Fra
+                //String usNumberStr = "+44 0870-0002-468";   //GB
+                //String usNumberStr = "+39 123 456 7891";   //Ita
+               // String usNumberStr = "+39 06/4941680";
+               // String usNumberStr = "+49 177 229 1110";  //Germany                                     //number to validate
+                //String usNumberStr = " 8 903 775-4867";
+                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+                try {
+                    Phonenumber.PhoneNumber usNumberProto = phoneUtil.parse(usNumberStr, "RU");            //with default country
+                    boolean isValid = phoneUtil.isValidNumber(usNumberProto);                  //returns true
+                    String usNumber = phoneUtil.format(usNumberProto, PhoneNumberUtil.PhoneNumberFormat.E164); //+12025550100
+                    String ruNumber = phoneUtil.formatOutOfCountryCallingNumber(usNumberProto, "RU");
+                    ruNumber = ruNumber.replaceAll(" ","");
+                    ruNumber = ruNumber.replaceAll("-","");
+                    Log.d("TAG", ruNumber);
+                } catch (NumberParseException e) {
+                    System.err.println("NumberParseException was thrown: " + e.toString());
+                }
+            }
+        });
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
 
-mechSetCar();
-               // Client myClient = new Client(editTextAddress.getText().toString(), Integer.parseInt("4443"), buffer);
+                mechSetCar();
+                // Client myClient = new Client(editTextAddress.getText().toString(), Integer.parseInt("4443"), buffer);
                 Client myClient = new Client("192.168.0.13", Integer.parseInt("4443"), combuffer);
                 myClient.execute();
             }
@@ -125,7 +177,7 @@ mechSetCar();
 
                 try {
 
-                    HttpUpLoader uploader = new HttpUpLoader("http://cbzt.changeip.org/upload_file.php?t=car", "/mnt/sdcard/Pictures/MyCameraApp/IMG_20160616_105900.jpg", "1191_bodyfront.jpg");
+                    HttpUpLoader uploader = new HttpUpLoader("http://ip.cbzt.ru/upload_file.php?t=car", "/mnt/sdcard/Pictures/MyCameraApp/IMG_20160616_105900.jpg", "1191_bodyfront.jpg");
                     result = uploader.execute().get(20000, TimeUnit.MILLISECONDS);
 if(result == 0){}
 
@@ -174,8 +226,10 @@ if(result == 0){}
             @Override
             public void onClick(View v) {
 
-                combuffer = "00000007 mechanic_sample";
-                Client myClient = new Client("ip.cbzt.ru", Integer.parseInt("4443"), combuffer);
+                combuffer = "00000001 mechanic_sample";
+                combuffer = "00000001 ord_adds_set_begin:n=`1945554`^ord_adds_set:id=`15`;use=`0`;cost=`0`;quantity=`0`^ord_adds_set:id=`8`;use=`0`;cost=`16`;quantity=`0`^ord_adds_set:id=`9`;use=`0`;cost=`16`;quantity=`0`^ord_adds_set:id=`12`;use=`0`;cost=`20`;quantity=`0`^ord_adds_set:id=`7`;use=`0`;cost=`20`;quantity=`0`^ord_adds_set:id=`6`;use=`1`;cost=`50`;quantity=`4`^ord_adds_set:id=`11`;use=`0`;cost=`100`;quantity=`0`^ord_adds_set:id=`10`;use=`0`;cost=`100`;quantity=`0`^ord_adds_set:id=`14`;use=`1`;cost=`50`;quantity=`1`^ord_adds_set:id=`2`;use=`1`;cost=`100`;quantity=`0`^ord_adds_set:id=`13`;use=`0`;cost=`0`;quantity=`0`^ord_adds_set:id=`3`;use=`1`;cost=`150`;quantity=`0`^ord_adds_set:id=`4`;use=`1`;cost=`100`;quantity=`0`^ord_adds_set_end^";
+
+                Client myClient = new Client("192.168.0.13", Integer.parseInt("4443"), combuffer);
                 myClient.execute();
             }
         });
@@ -195,25 +249,39 @@ if(result == 0){}
         {
             @Override
             public void onClick(View v) {
-
+String json1 = "{\"Autos\":[{\"auto_id\":\"78714\",\"auto_number\":\"Штрафы по ИНН (ООО Север Авто)\",\"auto_cdi\":null,\"gis_id\":\"\",\"Bills\":[{\"bill_id\":\"0356043010117030200014915\",\"pay_bill_date\":\"2017-03-02\",\"pay_bill_amount\":\"3000\",\"gis_podrazdelenie\":\"УФК по г.Москве (МАДИ л/с 04732224150)\",\"gis_discount\":\"50\",\"gis_discount_uptodate\":\"2017-03-23\",\"pay_bill_amount_with_discount\":\"1500\",\"gis_send_to\":\"Московская административная дорожная инспекция\",\"gis_inn\":\"7707821043\",\"gis_kpp\":\"770701001\",\"gis_kbk\":\"78211630020018000140\",\"gis_schet\":\"40101810045250010041\",\"gis_wireoktmo\":\"45382000\",\"gis_bank\":\"ГУ Банка России по ЦФО\",\"gis_bik\":\"44525000\",\"mos_date\":null,\"mos_time\":null,\"mos_location\":null,\"mos_article\":null,\"mos_article_number\":null,\"check_bill\":false,\"Max_Date_Payment\":\"2017-03-16\",\"url\":\"http://onlinegibdd.ru/pay.php?type=partners&partner_id=568&bill_ids=429128\"}]}]}";
+                parseJSON(json1);
             //   combuffer = "00000002 get_penalty";
             //    combuffer = "00000002 penalty_image:name=`18810177160822185916_penalty.jpg`";
-                combuffer = "00000002 get_rent";
-                Client myClient = new Client("192.168.0.13", Integer.parseInt("4443"), combuffer);
-                myClient.execute();
+           //     combuffer = "00000002 get_rent";
+           //     Client myClient = new Client("192.168.0.13", Integer.parseInt("4443"), combuffer);
+           //     myClient.execute();
             }
         });
 
-        buttonVolley.setOnClickListener(new View.OnClickListener()
+        buttonRetrofit.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v) {
 
-               // ping();
-        startApp();
+                startRestful();
+
+         // ping();
+        //startApp();
+            }
+        });
+
+        buttonRetrofitConfirm.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v) {
+
+                startREST_confirmm();
+
             }
         });
     }// end onCreate
+
 
 
     public void ping () {
@@ -363,7 +431,8 @@ for (int i = 0; i< abc.size(); i++) {
     }
 
     /**
-     *
+     *123
+     * class CarFeatures
      */
 
 public class CarFeatures {
@@ -405,10 +474,23 @@ public void checkVer() {
 }
 
 public void parseJSON (String str) {
+
+    if(str.contains(":null")) {
+        //String no = ":" + getResources().getString(R.string.nothing);
+        String no = ":" + "\"No\"";
+        String stmp = str.replace(":null", no);
+        str = stmp;
+    }
+
     JSONObject dataJsonObj = null;
 
     try {
         dataJsonObj = new JSONObject(str);
+        JSONArray autosJson = dataJsonObj.getJSONArray("Autos");
+        JSONObject penaltyJson = autosJson.getJSONObject(0);
+        String q = penaltyJson.getString("auto_cdi");
+        String w = penaltyJson.getString("auto_id");
+
        for(Iterator<String> it = dataJsonObj.keys(); it.hasNext();) {
            String key = it.next();
            Log.d("tag", key);
@@ -420,7 +502,81 @@ public void parseJSON (String str) {
     }catch (JSONException e) {
         e.printStackTrace();
         Log.d("JSON", "  "+e);
+        }
     }
-}
+
+    private void startRestful(){
+        RegisterRequest registerRequest = new RegisterRequest("89261005000");
+        Call<RegisterResponse> call = MyApp.getApi().register(registerRequest);
+        call.enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(Call<RegisterResponse>call, Response<RegisterResponse> response) {
+                //Данные успешно пришли, но надо проверить response.body() на null
+                Log.d("[SOCKET] ", response.toString());
+                if (response.isSuccessful()) {
+                    // Do your success stuff...
+                    String myToken = response.body().getSuccess().getToken();
+                    ((MyApp) getApplication()).setMyToken(myToken);
+                    Log.d("token: ", myToken);
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+
+                    } catch (Exception e) {
+                        Log.d("Exception  ", e.getMessage());
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<RegisterResponse>call, Throwable t) {
+                //Произошла ошибка
+                Log.e("[SOCKET] ", t.toString());
+            }
+        });
+    }
+
+    private void startREST_confirmm(){
+        String stok = ((MyApp) getApplication()).getMyToken();
+        ConfirmRequest confirmRequest = new ConfirmRequest("89261005000", stok, "55555");
+        Call<ConfirmResponse> call = MyApp.getApi().confirm(confirmRequest);
+
+        final ProgressDialog mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setMessage("Loading...");
+        mProgressDialog.show();
+
+        call.enqueue(new Callback<ConfirmResponse>() {
+            @Override
+            public void onResponse(Call<ConfirmResponse>call, Response<ConfirmResponse> response) {
+                //Данные успешно пришли, но надо проверить response.body() на null
+                Log.d("[SOCKET] ", response.toString());
+                if (response.isSuccessful()) {
+
+                    if (mProgressDialog.isShowing())
+                        mProgressDialog.dismiss();
+                    // Do your success stuff...
+                    //String sessionId = response.body().getSuccess().getSessionId();
+                    ConfirmResponse phone = response.body();
+                    Log.d("token: ", phone.toString());
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+
+                    } catch (Exception e) {
+                        Log.d("Exception  ", e.getMessage());
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<ConfirmResponse>call, Throwable t) {
+                //Произошла ошибка
+                Log.e("[SOCKET] ", t.toString());
+            }
+        });
+    }
+
+    private void startREST_logout() {
+
+    }
 
 }

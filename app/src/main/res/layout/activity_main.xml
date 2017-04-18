@@ -10,29 +10,24 @@
     tools:context="ru.taxi.socket.MainActivity">
 
     <Button
-        android:id="@+id/volleyButton"
+        android:id="@+id/retrofitButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/activity_vertical_margin"
         android:textSize="22sp"
-        android:text="Volley"
+        android:text="Retrofit 2 Register"
        />
-
-    <EditText
-        android:id="@+id/addressEditText"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/retrofitConfirmButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Server ip address"
-        android:layout_below="@id/volleyButton"
-        android:singleLine="true"/>
+        android:padding="@dimen/activity_vertical_margin"
+        android:textSize="22sp"
+        android:layout_toRightOf="@id/retrofitButton"
+        android:text="Retrofit 2 Confirm"
+        />
 
-    <EditText
-        android:id="@+id/portEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Server port number"
-        android:layout_below="@id/addressEditText"
-        android:singleLine="true"/>
+
 
     <Button
         android:id="@+id/connectButton"
@@ -40,10 +35,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:padding="@dimen/activity_vertical_margin"
-        android:layout_margin="10dp"
         android:textSize="22sp"
         android:text="Connect..."
-        android:layout_below="@id/portEditText"/>
+        android:layout_below="@id/retrofitButton"/>
 
     <Button
         android:id="@+id/upButton"
@@ -82,6 +76,15 @@
         android:text="Balance Taxi"
         android:layout_below="@id/sampleButton"/>
 
+    <Button
+        android:id="@+id/phoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/activity_vertical_margin"
+        android:textSize="22sp"
+        android:text="Phone Number"
+        android:layout_below="@+id/sampleButton"
+        android:layout_toRightOf="@id/balanceButton"/>
 
     <Button
         android:id="@+id/pingButton"
@@ -93,6 +96,8 @@
         android:text="PING Taxi"
         android:layout_toRightOf="@id/balanceButton"
         android:layout_below="@id/connectNewButton"/>
+
+
 
     <ProgressBar
         android:id="@+id/progressBar"

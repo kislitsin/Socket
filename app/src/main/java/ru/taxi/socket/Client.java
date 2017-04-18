@@ -80,7 +80,7 @@ public class Client extends AsyncTask<Void, Void, String> {
             //----------------------------------------------------------------
 
             //byte[] buf = new byte[100];
-          byte[] buf = "00000001 auth:screenSize=`4.07269`;platform=`android`;model=`m4_open_cis`;devid=`6cf9da7c2e914a22`;login=`1503`;ver=`3.12`;rc=`0`;pass=`112511`".getBytes("UTF-8");
+          byte[] buf = "00000001 auth:screenSize=`4.07269`;platform=`android`;model=`m4_open_cis`;devid=`6cf9da7c2e914a22`;login=`45`;ver=`3.12`;rc=`0`;pass=`45`".getBytes("UTF-8");
          //   byte[] buf = "00000001 auth:screenSize=`4.07269`;platform=`android`;model=`m4_open_cis`;devid=`6cf9da7c2e914a22`;login=`2192`;ver=`1.00`;rc=`0`;pass=`1234`".getBytes("UTF-8");
           //  byte[] buf = "00000001 auth:screenSize=`4.07269`;platform=`android`;model=`m4_open_cis`;devid=`6cf9da7c2e914a22`;login=`3711`;ver=`1.00`;rc=`0`;pass=`12365`".getBytes("UTF-8");
 
